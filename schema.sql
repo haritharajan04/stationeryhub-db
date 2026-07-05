@@ -1,13 +1,15 @@
--- Enable UUID extension if required for primary keys
+
+-- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Define Custom Enum Types
-CREATE TYPE user_role AS ENUM ('customer', 'admin');
+CREATE TYPE user_role AS ENUM ('customer', 'admin', 'employee');
+CREATE TYPE transaction_type AS ENUM ('customer_sale', 'supplier_purchase');
 CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled');
 CREATE TYPE payment_method AS ENUM ('COD', 'advance_full', 'advance_partial', 'EMI');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
-CREATE TYPE coupon_discount_type AS ENUM ('percent', 'flat');
 CREATE TYPE emi_status AS ENUM ('active', 'completed', 'defaulted');
+CREATE TYPE asset_status AS ENUM ('available', 'assigned', 'under_maintenance', 'retired');
 
 -- -----------------------------------------------------
 -- Table: Users
@@ -19,41 +21,23 @@ CREATE TABLE users (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     phone_number VARCHAR(15),
+    address TEXT,
     role user_role NOT NULL DEFAULT 'customer',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- -----------------------------------------------------
--- Table: Business Profiles (B2B Institution/Organization Support)
+-- Table: Suppliers
 -- -----------------------------------------------------
-CREATE TABLE business_profiles (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+CREATE TABLE suppliers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     company_name VARCHAR(200) NOT NULL,
     gst_number VARCHAR(20) UNIQUE NOT NULL,
     contact_person VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    phone_number VARCHAR(15) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- -----------------------------------------------------
--- Table: Addresses
--- -----------------------------------------------------
-CREATE TABLE addresses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    address_line_1 VARCHAR(255) NOT NULL,
-    address_line_2 VARCHAR(255),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) NOT NULL DEFAULT 'India',
-    is_default BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_addresses_user_id ON addresses(user_id);
 
 -- -----------------------------------------------------
 -- Table: Categories
@@ -67,162 +51,185 @@ CREATE TABLE categories (
 );
 
 -- -----------------------------------------------------
--- Table: Products
+-- Table: Item Master (Base Products)
 -- -----------------------------------------------------
-CREATE TABLE products (
+CREATE TABLE item_master (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0.00),
-    sku VARCHAR(100) UNIQUE NOT NULL,
+    sku_base VARCHAR(50) UNIQUE NOT NULL,
     category_id INT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_products_category_id ON products(category_id);
-
--- -----------------------------------------------------
--- Table: Product Images (Allows multiple images per product)
--- -----------------------------------------------------
-CREATE TABLE product_images (
-    id SERIAL PRIMARY KEY,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_product_images_product_id ON product_images(product_id);
+-- -----------------------------------------------------
+-- Table: Product Variants
+-- -----------------------------------------------------
+CREATE TABLE product_variants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    item_id UUID NOT NULL REFERENCES item_master(id) ON DELETE CASCADE,
+    name VARCHAR(200) NOT NULL,
+    sku VARCHAR(100) UNIQUE NOT NULL,
+    attributes JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_product_variants_item_id ON product_variants(item_id);
 
 -- -----------------------------------------------------
--- Table: Inventory Management
+-- Table: Units of Measure (UOM)
+-- -----------------------------------------------------
+CREATE TABLE units_of_measure (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    abbreviation VARCHAR(10) UNIQUE NOT NULL
+);
+
+-- Insert standard UOMs
+INSERT INTO units_of_measure (name, abbreviation) VALUES 
+('Piece', 'pc'),
+('Box', 'box'),
+('Carton', 'ctn')
+ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------------
+-- Table: Item UOM Config
+-- -----------------------------------------------------
+CREATE TABLE item_uoms (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    variant_id UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+    uom_id INT NOT NULL REFERENCES units_of_measure(id) ON DELETE RESTRICT,
+    quantity_multiplier INT NOT NULL DEFAULT 1 CHECK (quantity_multiplier >= 1),
+    sku_uom VARCHAR(100) UNIQUE NOT NULL,
+    
+    UNIQUE (variant_id, uom_id)
+);
+
+-- -----------------------------------------------------
+-- Table: Item Prices
+-- -----------------------------------------------------
+CREATE TABLE item_prices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    item_uom_id UUID NOT NULL REFERENCES item_uoms(id) ON DELETE CASCADE,
+    unit_price NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0.00),
+    effective_from TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    effective_to TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    
+    CONSTRAINT check_dates CHECK (effective_to IS NULL OR effective_to > effective_from)
+);
+
+CREATE INDEX idx_item_prices_active ON item_prices(item_uom_id, is_active);
+
+-- -----------------------------------------------------
+-- Table: Inventory
 -- -----------------------------------------------------
 CREATE TABLE inventory (
-    product_id UUID PRIMARY KEY REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
-    low_stock_threshold INT NOT NULL DEFAULT 5 CHECK (low_stock_threshold >= 0),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: Bulk Discounts (Quantity-based)
--- -----------------------------------------------------
-CREATE TABLE bulk_discounts (
-    id SERIAL PRIMARY KEY,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    min_quantity INT NOT NULL CHECK (min_quantity > 1),
-    discount_percent NUMERIC(5, 2) NOT NULL CHECK (discount_percent > 0.00 AND discount_percent <= 100.00),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (product_id, min_quantity)
-);
-
-CREATE INDEX idx_bulk_discounts_product_id ON bulk_discounts(product_id);
-
--- -----------------------------------------------------
--- Table: Coupons
--- -----------------------------------------------------
-CREATE TABLE coupons (
-    id SERIAL PRIMARY KEY,
-    code VARCHAR(50) UNIQUE NOT NULL,
-    discount_type coupon_discount_type NOT NULL,
-    discount_value NUMERIC(10, 2) NOT NULL CHECK (discount_value > 0.00),
-    min_order_value NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (min_order_value >= 0.00),
-    usage_limit INT NOT NULL DEFAULT 100 CHECK (usage_limit > 0),
-    used_count INT NOT NULL DEFAULT 0 CHECK (used_count >= 0),
-    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    expiry_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT check_dates CHECK (expiry_date > start_date),
-    CONSTRAINT check_usage_limit CHECK (used_count <= usage_limit)
-);
-
-CREATE INDEX idx_coupons_validity ON coupons(code, active, start_date, expiry_date);
-
--- -----------------------------------------------------
--- Table: Coupon Categories (Category-based restrictions)
--- -----------------------------------------------------
-CREATE TABLE coupon_categories (
-    coupon_id INT NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
-    category_id INT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-    PRIMARY KEY (coupon_id, category_id)
-);
-
--- -----------------------------------------------------
--- Table: Carts & Cart Items
--- -----------------------------------------------------
-CREATE TABLE carts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE cart_items (
-    cart_id UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    PRIMARY KEY (cart_id, product_id)
-);
-
--- -----------------------------------------------------
--- Table: Wishlist
--- -----------------------------------------------------
-CREATE TABLE wishlists (
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, product_id)
+    item_uom_id UUID NOT NULL REFERENCES item_uoms(id) ON DELETE CASCADE,
+    seller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    unit_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (unit_price >= 0.00),
+    low_stock_threshold INT NOT NULL DEFAULT 5 CHECK (low_stock_threshold >= 0),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE (item_uom_id, seller_id)
 );
 
 -- -----------------------------------------------------
--- Table: Orders
+-- Table: Assets
 -- -----------------------------------------------------
-CREATE TABLE orders (
+CREATE TABLE assets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(150) NOT NULL,
+    serial_number VARCHAR(100) UNIQUE NOT NULL,
+    asset_tag VARCHAR(50) UNIQUE NOT NULL,
+    status asset_status NOT NULL DEFAULT 'available',
+    purchase_date DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------
+-- Table: Asset Assignments
+-- -----------------------------------------------------
+CREATE TABLE asset_assignments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    returned_at TIMESTAMP WITH TIME ZONE,
+    remarks TEXT
+);
+
+-- -----------------------------------------------------
+-- Table: Maintenance Logs
+-- -----------------------------------------------------
+CREATE TABLE maintenance_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+    maintenance_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    description TEXT NOT NULL,
+    cost NUMERIC(10, 2) NOT NULL CHECK (cost >= 0.00),
+    performed_by VARCHAR(150),
+    next_due_date DATE
+);
+
+-- -----------------------------------------------------
+-- Table: Communications
+-- -----------------------------------------------------
+CREATE TABLE communications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    coupon_id INT REFERENCES coupons(id) ON DELETE SET NULL,
-    shipping_address_id UUID NOT NULL REFERENCES addresses(id) ON DELETE RESTRICT,
-    
-    gst_number VARCHAR(20),
-    contact_person VARCHAR(100),
+    asset_id UUID REFERENCES assets(id) ON DELETE SET NULL,
+    channel VARCHAR(50) NOT NULL,
+    subject VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------
+-- Table: Transactions
+-- -----------------------------------------------------
+CREATE TABLE transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    type transaction_type NOT NULL,
+    customer_user_id UUID REFERENCES users(id) ON DELETE RESTRICT,
+    supplier_id UUID REFERENCES suppliers(id) ON DELETE RESTRICT,
     
     total_raw_amount NUMERIC(10, 2) NOT NULL CHECK (total_raw_amount >= 0.00),
     discount_amount NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (discount_amount >= 0.00),
     shipping_fee NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (shipping_fee >= 0.00),
     final_amount NUMERIC(10, 2) NOT NULL CHECK (final_amount >= 0.00),
     
-    order_status order_status NOT NULL DEFAULT 'pending',
+    status order_status NOT NULL DEFAULT 'pending',
+    gst_number VARCHAR(20),
+    shipping_address VARCHAR(500) DEFAULT 'Customer Address',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    
+    CONSTRAINT check_transaction_party CHECK (
+        (type = 'customer_sale' AND customer_user_id IS NOT NULL AND supplier_id IS NULL) OR
+        (type = 'supplier_purchase' AND supplier_id IS NOT NULL AND customer_user_id IS NULL)
+    )
 );
 
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_orders_created_at ON orders(created_at);
-
 -- -----------------------------------------------------
--- Table: Order Items
+-- Table: Transaction Items
 -- -----------------------------------------------------
-CREATE TABLE order_items (
+CREATE TABLE transaction_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+    item_uom_id UUID NOT NULL REFERENCES item_uoms(id) ON DELETE RESTRICT,
     quantity INT NOT NULL CHECK (quantity > 0),
     unit_price NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0.00),
-    bulk_discount_applied NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (bulk_discount_applied >= 0.00),
     final_item_price NUMERIC(10, 2) NOT NULL CHECK (final_item_price >= 0.00)
 );
-
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
 
 -- -----------------------------------------------------
 -- Table: Payments
 -- -----------------------------------------------------
 CREATE TABLE payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
     payment_method payment_method NOT NULL,
     payment_status payment_status NOT NULL DEFAULT 'pending',
     amount_paid NUMERIC(10, 2) NOT NULL CHECK (amount_paid >= 0.00),
@@ -231,11 +238,11 @@ CREATE TABLE payments (
 );
 
 -- -----------------------------------------------------
--- Table: EMI Plans (For orders >= ₹2000)
+-- Table: EMI Plans (For transactions >= ₹2000)
 -- -----------------------------------------------------
 CREATE TABLE emi_plans (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    transaction_id UUID UNIQUE NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
     tenure_months INT NOT NULL CHECK (tenure_months IN (3, 6, 9, 12, 18, 24)),
     interest_rate NUMERIC(5, 2) NOT NULL DEFAULT 0.00 CHECK (interest_rate >= 0.00),
     monthly_installment NUMERIC(10, 2) NOT NULL CHECK (monthly_installment > 0.00),
@@ -244,25 +251,11 @@ CREATE TABLE emi_plans (
 );
 
 -- -----------------------------------------------------
--- Table: Reviews & Ratings
--- -----------------------------------------------------
-CREATE TABLE reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    review_text TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, product_id)
-);
-
--- -----------------------------------------------------
 -- Table: Order Tracking
 -- -----------------------------------------------------
 CREATE TABLE order_tracking (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
     status_update VARCHAR(100) NOT NULL,
     description TEXT,
     location VARCHAR(150),
@@ -277,9 +270,9 @@ RETURNS TRIGGER AS $$
 DECLARE
     order_amount NUMERIC(10, 2);
 BEGIN
-    SELECT final_amount INTO order_amount FROM orders WHERE id = NEW.order_id;
+    SELECT final_amount INTO order_amount FROM transactions WHERE id = NEW.transaction_id;
     IF order_amount < 2000.00 THEN
-        RAISE EXCEPTION 'Order final amount (₹%) is less than the minimum ₹2000.00 threshold required for EMI.', order_amount;
+        RAISE EXCEPTION 'Transaction final amount (₹%) is less than the minimum ₹2000.00 threshold required for EMI.', order_amount;
     END IF;
     RETURN NEW;
 END;
@@ -288,3 +281,16 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER check_emi_eligibility
 BEFORE INSERT OR UPDATE ON emi_plans
 FOR EACH ROW EXECUTE FUNCTION verify_emi_eligibility();
+
+-- -----------------------------------------------------
+-- Table: Support Tickets
+-- -----------------------------------------------------
+CREATE TABLE support_tickets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL,
+    subject VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Pending Review',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

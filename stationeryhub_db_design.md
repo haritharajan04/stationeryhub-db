@@ -1,339 +1,298 @@
-# StationeryHub PostgreSQL Database Design (Updated)
+# StationeryHub Database System Specification & Diagrams
 
-This document outlines the updated database design for **StationeryHub**, incorporating coupon usage limits, multiple product images, institution/organization support, and coupon category restrictions.
+This document contains the complete database specification for **StationeryHub**, including the Use Case Diagram, Physical Database Diagram, and a complete Data Dictionary detailing all tables, columns, constraints, and relationships.
 
 ---
 
-## 1. Updated Entity Relationship (ER) Diagram
+## 1. Use Case Diagram
 
-The diagram below maps all entities, including the newly introduced tables and relationships.
+The diagram below maps how different actors (Customers, Suppliers, Admins/Employees) interact with the database tables.
+
+```mermaid
+flowchart TD
+    subgraph Actors
+        C[Customer]
+        S[Supplier]
+        A[Admin / Employee]
+    end
+
+    subgraph User & Asset Cases
+        UC1(Assign Assets to Staff) --> asset_assignments
+        UC2(Log Maintenance History) --> maintenance_logs
+        UC3(Send/Receive Messages) --> communications
+    end
+
+    subgraph Catalog & Pricing Cases
+        PC1(Browse Category Hierarchy) --> categories
+        PC2(Lookup Base Item) --> item_master
+        PC3(Select UOM: Pc/Box/Carton) --> item_uoms
+        PC4(Fetch Active Price) --> item_prices
+    end
+
+    subgraph Transaction Cases
+        TC1(Place Sale Orders) --> transactions
+        TC2(Fulfill Inventory Purchase) --> transactions
+        TC3(Process Payments: COD/Advance/EMI) --> payments
+        TC4(Trigger EMI Checks) --> emi_plans
+        TC5(Record Shipping Milestones) --> order_tracking
+    end
+
+    %% Actor Relationships
+    C --> PC1
+    C --> PC3
+    C --> TC1
+    C --> TC3
+    
+    S --> TC2
+    
+    A --> UC1
+    A --> UC2
+    A --> PC2
+    A --> PC3
+    A --> PC4
+    A --> TC5
+```
+
+---
+
+## 2. Physical Database Diagram
+
+This physical-level diagram shows the tables, column names, exact PostgreSQL data types, primary keys (PK), and foreign keys (FK).
 
 ```mermaid
 erDiagram
-    USERS ||--o{ ADDRESSES : "has"
-    USERS ||--o| CARTS : "has"
-    USERS ||--o{ WISHLISTS : "saves"
-    USERS ||--o{ ORDERS : "places"
-    USERS ||--o{ REVIEWS : "writes"
-    USERS ||--o| BUSINESS_PROFILES : "has"
+    users {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        varchar first_name
+        varchar last_name
+        varchar phone_number
+        user_role role
+        timestamp created_at
+    }
+
+    suppliers {
+        uuid id PK
+        varchar company_name
+        varchar gst_number UK
+        varchar contact_person
+        varchar phone_number
+        varchar email UK
+        timestamp created_at
+    }
+
+    categories {
+        int id PK
+        varchar name UK
+        text description
+        int parent_category_id FK
+        timestamp created_at
+    }
+
+    item_master {
+        uuid id PK
+        varchar name
+        text description
+        varchar sku_base UK
+        int category_id FK
+        timestamp created_at
+    }
+
+    units_of_measure {
+        int id PK
+        varchar name UK
+        varchar abbreviation UK
+    }
+
+    item_uoms {
+        uuid id PK
+        uuid item_id FK
+        int uom_id FK
+        int quantity_multiplier
+        varchar sku_uom UK
+    }
+
+    item_prices {
+        uuid id PK
+        uuid item_uom_id FK
+        numeric unit_price
+        timestamp effective_from
+        timestamp effective_to
+        boolean is_active
+    }
+
+    inventory {
+        uuid item_uom_id PK_FK
+        int quantity
+        int low_stock_threshold
+        timestamp updated_at
+    }
+
+    assets {
+        uuid id PK
+        varchar name
+        varchar serial_number UK
+        varchar asset_tag UK
+        asset_status status
+        date purchase_date
+        timestamp created_at
+    }
+
+    asset_assignments {
+        uuid id PK
+        uuid asset_id FK
+        uuid user_id FK
+        timestamp assigned_at
+        timestamp returned_at
+        text remarks
+    }
+
+    maintenance_logs {
+        uuid id PK
+        uuid asset_id FK
+        timestamp maintenance_date
+        text description
+        numeric cost
+        varchar performed_by
+        date next_due_date
+    }
+
+    communications {
+        uuid id PK
+        uuid user_id FK
+        uuid asset_id FK
+        varchar channel
+        varchar subject
+        text message
+        timestamp sent_at
+    }
+
+    transactions {
+        uuid id PK
+        transaction_type type
+        uuid customer_user_id FK
+        uuid supplier_id FK
+        numeric total_raw_amount
+        numeric discount_amount
+        numeric shipping_fee
+        numeric final_amount
+        order_status status
+        varchar gst_number
+        timestamp created_at
+    }
+
+    transaction_items {
+        uuid id PK
+        uuid transaction_id FK
+        uuid item_uom_id FK
+        int quantity
+        numeric unit_price
+        numeric final_item_price
+    }
+
+    payments {
+        uuid id PK
+        uuid transaction_id FK
+        payment_method payment_method
+        payment_status payment_status
+        numeric amount_paid
+        varchar transaction_reference
+        timestamp created_at
+    }
+
+    emi_plans {
+        uuid id PK
+        uuid transaction_id UK_FK
+        int tenure_months
+        numeric interest_rate
+        numeric monthly_installment
+        emi_status status
+        timestamp created_at
+    }
+
+    order_tracking {
+        uuid id PK
+        uuid transaction_id FK
+        varchar status_update
+        text description
+        varchar location
+        timestamp updated_at
+    }
+
+    %% Relationships
+    categories ||--o{ categories : "parent_category_id"
+    categories ||--o{ item_master : "category_id"
+    item_master ||--o{ item_uoms : "item_id"
+    units_of_measure ||--o{ item_uoms : "uom_id"
+    item_uoms ||--o{ item_prices : "item_uom_id"
+    item_uoms ||--o| inventory : "item_uom_id"
+    item_uoms ||--o{ transaction_items : "item_uom_id"
     
-    CATEGORIES ||--o{ CATEGORIES : "parent of"
-    CATEGORIES ||--o{ PRODUCTS : "contains"
-    CATEGORIES ||--o{ COUPON_CATEGORIES : "restricts"
+    users ||--o{ asset_assignments : "user_id"
+    users ||--o{ communications : "user_id"
+    users ||--o{ transactions : "customer_user_id"
     
-    PRODUCTS ||--o| INVENTORY : "tracks"
-    PRODUCTS ||--o{ BULK_DISCOUNTS : "defines"
-    PRODUCTS ||--o{ WISHLISTS : "saved in"
-    PRODUCTS ||--o{ CART_ITEMS : "added to"
-    PRODUCTS ||--o{ ORDER_ITEMS : "purchased in"
-    PRODUCTS ||--o{ REVIEWS : "reviewed in"
-    PRODUCTS ||--o{ PRODUCT_IMAGES : "has"
+    suppliers ||--o{ transactions : "supplier_id"
     
-    CARTS ||--o{ CART_ITEMS : "contains"
+    assets ||--o{ asset_assignments : "asset_id"
+    assets ||--o{ maintenance_logs : "asset_id"
+    assets ||--o{ communications : "asset_id"
     
-    COUPONS ||--o{ ORDERS : "applied to"
-    COUPONS ||--o{ COUPON_CATEGORIES : "restricted to"
-    
-    ORDERS ||--o{ ORDER_ITEMS : "consists of"
-    ORDERS ||--o{ PAYMENTS : "paid via"
-    ORDERS ||--o{ ORDER_TRACKING : "tracked by"
-    ORDERS ||--o| EMI_PLANS : "financed by"
+    transactions ||--o{ transaction_items : "transaction_id"
+    transactions ||--o{ payments : "transaction_id"
+    transactions ||--o| emi_plans : "transaction_id"
+    transactions ||--o{ order_tracking : "transaction_id"
 ```
 
 ---
 
-## 2. Updated Database Schema DDL (SQL Script)
+## 3. Data Structures & Table Specification
 
-```sql
--- Enable UUID extension if required for primary keys
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+### Module A: Core User & Organization Structure
+1. **`users`**
+   - Stores account credentials, contact data, and roles (`customer`, `admin`, `employee`).
+   - Links: Parent to `asset_assignments`, `communications`, and customer-side `transactions`.
+2. **`suppliers`**
+   - Tracks corporate suppliers supplying items to StationeryHub.
+   - Links: Parent to `transactions` (`supplier_purchase` type).
+3. **`categories`**
+   - Catalog index support (e.g., "Paper", "Writing Instruments"). Links back to itself to define hierarchies (e.g., "Notebooks" under "Paper").
+   - Links: Parent to `item_master`.
 
--- Define Custom Enum Types
-CREATE TYPE user_role AS ENUM ('customer', 'admin');
-CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled');
-CREATE TYPE payment_method AS ENUM ('COD', 'advance_full', 'advance_partial', 'EMI');
-CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
-CREATE TYPE coupon_discount_type AS ENUM ('percent', 'flat');
-CREATE TYPE emi_status AS ENUM ('active', 'completed', 'defaulted');
+### Module B: Item Master & Pricing Structure
+1. **`item_master`**
+   - The central list of products. Contains static specifications (Name, Description, Base SKU).
+   - Links: Parent to `item_uoms`.
+2. **`units_of_measure`**
+   - Lookup containing UOM metadata (Piece, Box, Carton).
+   - Links: Parent to `item_uoms`.
+3. **`item_uoms`**
+   - Maps which products support which packaging configurations. Calculates parent conversions (e.g., 1 Box = 12 Pieces).
+   - Links: Parent to `item_prices`, `inventory`, and `transaction_items`.
+4. **`item_prices`**
+   - Dedicated price ledger to track values independently of item metadata.
+   - Links: Child of `item_uoms`.
 
--- -----------------------------------------------------
--- Table: Users
--- -----------------------------------------------------
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(15),
-    role user_role NOT NULL DEFAULT 'customer',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+### Module C: Assets, Maintenance & Tracking
+1. **`assets`**
+   - Tracks corporate devices, logistics equipment, and facilities.
+   - Links: Parent to `asset_assignments`, `maintenance_logs`, and `communications`.
+2. **`asset_assignments`**
+   - Log tracking who is/was in possession of specific assets.
+3. **`maintenance_logs`**
+   - Tracks repair entries, durations, costs, and providers for company hardware.
+4. **`communications`**
+   - Historical records of emails/notifications sent to staff/users, optionally tagged to assets.
 
--- -----------------------------------------------------
--- Table: Business Profiles (B2B Institution/Organization Support)
--- -----------------------------------------------------
-CREATE TABLE business_profiles (
-    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    company_name VARCHAR(200) NOT NULL,
-    gst_number VARCHAR(20) UNIQUE NOT NULL,
-    contact_person VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: Addresses
--- -----------------------------------------------------
-CREATE TABLE addresses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    address_line_1 VARCHAR(255) NOT NULL,
-    address_line_2 VARCHAR(255),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) NOT NULL DEFAULT 'India',
-    is_default BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_addresses_user_id ON addresses(user_id);
-
--- -----------------------------------------------------
--- Table: Categories
--- -----------------------------------------------------
-CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT,
-    parent_category_id INT REFERENCES categories(id) ON DELETE SET NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: Products
--- -----------------------------------------------------
-CREATE TABLE products (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0.00),
-    sku VARCHAR(100) UNIQUE NOT NULL,
-    category_id INT NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_products_category_id ON products(category_id);
-
--- -----------------------------------------------------
--- Table: Product Images (Allows multiple images per product)
--- -----------------------------------------------------
-CREATE TABLE product_images (
-    id SERIAL PRIMARY KEY,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    image_url TEXT NOT NULL,
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE, -- Flag for main thumbnail
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_product_images_product_id ON product_images(product_id);
-
--- -----------------------------------------------------
--- Table: Inventory Management
--- -----------------------------------------------------
-CREATE TABLE inventory (
-    product_id UUID PRIMARY KEY REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
-    low_stock_threshold INT NOT NULL DEFAULT 5 CHECK (low_stock_threshold >= 0),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: Bulk Discounts (Quantity-based)
--- -----------------------------------------------------
-CREATE TABLE bulk_discounts (
-    id SERIAL PRIMARY KEY,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    min_quantity INT NOT NULL CHECK (min_quantity > 1),
-    discount_percent NUMERIC(5, 2) NOT NULL CHECK (discount_percent > 0.00 AND discount_percent <= 100.00),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (product_id, min_quantity)
-);
-
-CREATE INDEX idx_bulk_discounts_product_id ON bulk_discounts(product_id);
-
--- -----------------------------------------------------
--- Table: Coupons
--- -----------------------------------------------------
-CREATE TABLE coupons (
-    id SERIAL PRIMARY KEY,
-    code VARCHAR(50) UNIQUE NOT NULL,
-    discount_type coupon_discount_type NOT NULL,
-    discount_value NUMERIC(10, 2) NOT NULL CHECK (discount_value > 0.00),
-    min_order_value NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (min_order_value >= 0.00),
-    usage_limit INT NOT NULL DEFAULT 100 CHECK (usage_limit > 0),
-    used_count INT NOT NULL DEFAULT 0 CHECK (used_count >= 0),
-    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    expiry_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT check_dates CHECK (expiry_date > start_date),
-    CONSTRAINT check_usage_limit CHECK (used_count <= usage_limit)
-);
-
-CREATE INDEX idx_coupons_validity ON coupons(code, active, start_date, expiry_date);
-
--- -----------------------------------------------------
--- Table: Coupon Categories (Category-based restrictions)
--- -----------------------------------------------------
-CREATE TABLE coupon_categories (
-    coupon_id INT NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
-    category_id INT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-    PRIMARY KEY (coupon_id, category_id)
-);
-
--- -----------------------------------------------------
--- Table: Carts & Cart Items
--- -----------------------------------------------------
-CREATE TABLE carts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE cart_items (
-    cart_id UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    PRIMARY KEY (cart_id, product_id)
-);
-
--- -----------------------------------------------------
--- Table: Wishlist
--- -----------------------------------------------------
-CREATE TABLE wishlists (
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, product_id)
-);
-
--- -----------------------------------------------------
--- Table: Orders (Tracks transactional B2B details explicitly)
--- -----------------------------------------------------
-CREATE TABLE orders (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-    coupon_id INT REFERENCES coupons(id) ON DELETE SET NULL,
-    shipping_address_id UUID NOT NULL REFERENCES addresses(id) ON DELETE RESTRICT,
-    
-    -- Snapshots of organization billing info for B2B bulk orders at checkout
-    gst_number VARCHAR(20),
-    contact_person VARCHAR(100),
-    
-    total_raw_amount NUMERIC(10, 2) NOT NULL CHECK (total_raw_amount >= 0.00),
-    discount_amount NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (discount_amount >= 0.00),
-    shipping_fee NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (shipping_fee >= 0.00),
-    final_amount NUMERIC(10, 2) NOT NULL CHECK (final_amount >= 0.00),
-    
-    order_status order_status NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_orders_created_at ON orders(created_at);
-
--- -----------------------------------------------------
--- Table: Order Items
--- -----------------------------------------------------
-CREATE TABLE order_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    unit_price NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0.00),
-    bulk_discount_applied NUMERIC(10, 2) NOT NULL DEFAULT 0.00 CHECK (bulk_discount_applied >= 0.00),
-    final_item_price NUMERIC(10, 2) NOT NULL CHECK (final_item_price >= 0.00)
-);
-
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
-
--- -----------------------------------------------------
--- Table: Payments
--- -----------------------------------------------------
-CREATE TABLE payments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    payment_method payment_method NOT NULL,
-    payment_status payment_status NOT NULL DEFAULT 'pending',
-    amount_paid NUMERIC(10, 2) NOT NULL CHECK (amount_paid >= 0.00),
-    transaction_reference VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: EMI Plans (For orders >= ₹2000)
--- -----------------------------------------------------
-CREATE TABLE emi_plans (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    tenure_months INT NOT NULL CHECK (tenure_months IN (3, 6, 9, 12, 18, 24)),
-    interest_rate NUMERIC(5, 2) NOT NULL DEFAULT 0.00 CHECK (interest_rate >= 0.00),
-    monthly_installment NUMERIC(10, 2) NOT NULL CHECK (monthly_installment > 0.00),
-    status emi_status NOT NULL DEFAULT 'active',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------
--- Table: Reviews & Ratings
--- -----------------------------------------------------
-CREATE TABLE reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    review_text TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, product_id)
-);
-
--- -----------------------------------------------------
--- Table: Order Tracking
--- -----------------------------------------------------
-CREATE TABLE order_tracking (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    status_update VARCHAR(100) NOT NULL,
-    description TEXT,
-    location VARCHAR(150),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
-
----
-
-## 3. Implementation of Updates & Additional Rules
-
-### A. Coupon Usage Limit & Count Check
-- Added `usage_limit` and `used_count` columns to `coupons`.
-- Added the check constraint `CONSTRAINT check_usage_limit CHECK (used_count <= usage_limit)` to guarantee at the database layer that no transaction violates the limits.
-
-### B. Product Images Table
-- Defined a `product_images` table supporting 1-to-many images per product.
-- Added a `is_primary` boolean column to easily identify the main display thumbnail for product cards.
-
-### C. Institution/Organization B2B Support
-- Defined a `business_profiles` table linked 1-to-1 to users, allowing businesses to create corporate profiles (storing persistent settings like company name, GSTIN, and contact details).
-- Added snapshot columns `gst_number` and `contact_person` directly to the `orders` table. When a B2B user places an order, their business details are copied to the order record. This keeps invoices legally binding even if the profile changes in the future.
-
-### D. Category-Restricted Coupons
-- Added the `coupon_categories` join table mapping coupon rules to specific categories.
-- During coupon application, check queries can verify if items in the order match restricted categories before applying the discount.
+### Module D: Transactions Ledger
+1. **`transactions`**
+   - Unified ledger recording B2C customer orders and B2B vendor supply transactions.
+2. **`transaction_items`**
+   - Details item quantities, custom pricing rates, and subtotals per line.
+3. **`payments`**
+   - Logs monetary transfers (COD collections, online deposits, down payments).
+4. **`emi_plans`**
+   - Payment logs recording credit arrangements for sales above ₹2000.
+5. **`order_tracking`**
+   - Records logistic checkpoints ("Shipped", "Out for Delivery", "Delivered") with timestamps and GPS/city tags.

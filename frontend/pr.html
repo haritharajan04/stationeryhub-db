@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StationeryHub - Advanced Enterprise Presentation</title>
+    <link rel="stylesheet" href="pr.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title Slide (Dark Theme) -->
+        <section class="slide slide-dark active-slide" id="slide-1">
+            <div class="glow-bg"></div>
+            <div class="slide-content center-align">
+                <div class="icon-circle">
+                    <span class="icon-asset">📦</span>
+                </div>
+                <h1 class="main-title">Stationery<span>Hub</span></h1>
+                <p class="subtitle-text">Enterprise Database Architecture & Product Variant Model</p>
+                <div class="quote-container">
+                    <p class="quote">"Transactional Integrity. Scalable Catalog. Real-Time Operations."</p>
+                </div>
+                <div class="pill-container">
+                    <span class="pill">PostgreSQL</span>
+                    <span class="pill">Variant Model</span>
+                    <span class="pill">Multi-UOM Caching</span>
+                    <span class="pill">ACID Compliance</span>
+                </div>
+                <p class="footer-note">Press space, right arrow, or click down to navigate.</p>
+            </div>
+        </section>
+
+        <!-- Slide 2: The Problem (Light Theme) -->
+        <section class="slide slide-light" id="slide-2">
+            <div class="slide-content">
+                <h2 class="slide-header">The Catalog Problem</h2>
+                <p class="slide-subheader">How traditional stationery commerce structures fail at scale</p>
+                
+                <div class="problem-grid">
+                    <div class="problem-card">
+                        <div class="card-line"></div>
+                        <span class="card-icon">⚠️</span>
+                        <h3>Variant Explosion</h3>
+                        <p>Creating separate products for every single size, color, or rule layout creates catalog duplication and breaks stock tracing.</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="card-line"></div>
+                        <span class="card-icon">💵</span>
+                        <h3>Static Price Stalls</h3>
+                        <p>Storing prices directly inside the main items table overwrites historical price records and alters previous billing logs.</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="card-line"></div>
+                        <span class="card-icon">📦</span>
+                        <h3>Pack Scale Latency</h3>
+                        <p>Inefficient mapping of different transaction units (buying in pieces, selling in boxes or cartons) breaks stock balance calculations.</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="card-line"></div>
+                        <span class="card-icon">🔒</span>
+                        <h3>Audit Inconsistencies</h3>
+                        <p>Lacking separated transaction records for suppliers and customers makes inventory auditing and GST reconciliation difficult.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Our Solution (Dark Theme) -->
+        <section class="slide slide-dark" id="slide-3">
+            <div class="glow-bg"></div>
+            <div class="slide-content">
+                <h2 class="slide-header text-white">Our Solution</h2>
+                <p class="slide-subheader text-light-gray">An enterprise-ready normalized PostgreSQL backend</p>
+
+                <div class="solution-grid">
+                    <div class="solution-card">
+                        <div class="icon-wrap color-1">🎨</div>
+                        <h3>Product Variant Model</h3>
+                        <p>Splits catalog into base models (Item Master) and variants (colors, layouts) with dynamic JSONB attribute fields.</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon-wrap color-2">📊</div>
+                        <h3>UOM Configuration</h3>
+                        <p>Tracks packaging conversions (1 Carton = 120 Pieces) through a structured mapping table.</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon-wrap color-3">📅</div>
+                        <h3>Isolated Pricing Ledger</h3>
+                        <p>Stores pricing history with start and end dates. Preserves past financial reports while allowing future adjustments.</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon-wrap color-4">💼</div>
+                        <h3>Unified Ledger</h3>
+                        <p>Supports both B2C customer sales and B2B supplier orders in a unified table using database checks.</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon-wrap color-5">🛡️</div>
+                        <h3>EMI Constraint Triggers</h3>
+                        <p>Automatically blocks EMI payment selections for orders under ₹2000 at the database engine layer.</p>
+                    </div>
+                    <div class="solution-card">
+                        <div class="icon-wrap color-6">🖥️</div>
+                        <h3>Asset Management</h3>
+                        <p>Tracks workspace hardware distribution, user communication channels, and device maintenance costs.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: System Architecture (Light Theme) -->
+        <section class="slide slide-light" id="slide-4">
+            <div class="slide-content">
+                <h2 class="slide-header">System Architecture</h2>
+                <p class="slide-subheader">Three-tier scalable relational database architecture</p>
+
+                <div class="tier-grid">
+                    <!-- Tier 1 -->
+                    <div class="tier-card tier-purple">
+                        <div class="tier-header">TIER 1</div>
+                        <h3>Frontend Storefront</h3>
+                        <ul class="tier-list">
+                            <li>Glassmorphism design layout</li>
+                            <li>Dynamic variant options selector</li>
+                            <li>Multi-UOM pack selector</li>
+                            <li>Real-time cart & EMI validation</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 2 -->
+                    <div class="tier-card tier-blue">
+                        <div class="tier-header">TIER 2</div>
+                        <h3>App & Python API</h3>
+                        <ul class="tier-list">
+                            <li>Database CRUD connections</li>
+                            <li>Seed & Migrations engines</li>
+                            <li>Unified billing logic checks</li>
+                            <li>Automated error processing</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 3 -->
+                    <div class="tier-card tier-green">
+                        <div class="tier-header">TIER 3</div>
+                        <h3>PostgreSQL Server</h3>
+                        <ul class="tier-list">
+                            <li>Variants & Attributes indices</li>
+                            <li>Independent pricing history</li>
+                            <li>Database triggers on EMI plans</li>
+                            <li>Asset allocation ledgers</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tech-stack-banner">
+                    Tech Stack: HTML5 • CSS Grid • Vanilla JavaScript • PostgreSQL • Python Scripting • Docker Containers
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Product Variant Model Flow (Dark Theme) -->
+        <section class="slide slide-dark" id="slide-5">
+            <div class="glow-bg"></div>
+            <div class="slide-content">
+                <h2 class="slide-header text-white">Product Variant Flow</h2>
+                <p class="slide-subheader text-light-gray">How variants, packaging configs, and prices connect</p>
+
+                <div class="flow-container">
+                    <!-- Step 1 -->
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <h3>Item Master</h3>
+                        <p>Stores base product metadata.<br><strong>e.g. Pilot V7 Pen</strong></p>
+                    </div>
+                    <div class="flow-arrow">➔</div>
+
+                    <!-- Step 2 -->
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <h3>Product Variant</h3>
+                        <p>Details variations via JSONB.<br><strong>e.g. Color: Blue</strong></p>
+                    </div>
+                    <div class="flow-arrow">➔</div>
+
+                    <!-- Step 3 -->
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <h3>UOM Configuration</h3>
+                        <p>Maps sizes to stock counts.<br><strong>e.g. Box (12 Pieces)</strong></p>
+                    </div>
+                    <div class="flow-arrow">➔</div>
+
+                    <!-- Step 4 -->
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <h3>Pricing Ledger</h3>
+                        <p>Associates active prices.<br><strong>e.g. Unit Price: ₹900.00</strong></p>
+                    </div>
+                </div>
+
+                <div class="verification-banner">
+                    ✓ Clean Database Normalization (3NF) • Zero duplicate product records • Easy stock balance validation
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Key Features (Light Theme) -->
+        <section class="slide slide-light" id="slide-6">
+            <div class="slide-content">
+                <h2 class="slide-header">Key System Capabilities</h2>
+                <p class="slide-subheader">Features supporting transactional B2C, B2B, and internal processes</p>
+
+                <div class="features-split">
+                    <!-- Left: eCommerce Storefront -->
+                    <div class="feature-col purple-accent">
+                        <h3>🛒 Commerce Core</h3>
+                        <ul class="feature-bullets">
+                            <li>Multi-UOM selections (Piece, Box, Carton) on single cards</li>
+                            <li>Time-bound coupon usage limits and validation checks</li>
+                            <li>EMI selection allowed only for transactions &ge; ₹2000.00</li>
+                            <li>Audit snapshots of GST and client contact details at checkout</li>
+                        </ul>
+                    </div>
+
+                    <!-- Right: Internal Operations -->
+                    <div class="feature-col blue-accent">
+                        <h3>⚙️ Internal Operations</h3>
+                        <ul class="feature-bullets">
+                            <li>Dual transaction entries for customer sales and supplier purchases</li>
+                            <li>Company asset assignments tracking with return date histories</li>
+                            <li>Distinct logging of hardware maintenance and repair costs</li>
+                            <li>Historical messaging system logs for administrative audits</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Technical Advantages (Dark Theme) -->
+        <section class="slide slide-dark" id="slide-7">
+            <div class="glow-bg"></div>
+            <div class="slide-content">
+                <h2 class="slide-header text-white">Why Our Architecture Stands Out</h2>
+                <p class="slide-subheader text-light-gray">Core technical advantages built into the PostgreSQL backend</p>
+
+                <div class="advantages-grid">
+                    <div class="adv-card">
+                        <div class="adv-badge color-green">⚡</div>
+                        <h3>Database Trigger Validation</h3>
+                        <p>Critical business logic (like EMI thresholds) runs directly inside the database, preventing invalid application updates.</p>
+                    </div>
+                    <div class="adv-card">
+                        <div class="adv-badge color-blue">🔒</div>
+                        <h3>Audit Integrity</h3>
+                        <p>Changes in prices or product names do not affect past transaction records, ensuring consistent invoicing.</p>
+                    </div>
+                    <div class="adv-card">
+                        <div class="adv-badge color-gold">📊</div>
+                        <h3>Optimized Indexing</h3>
+                        <p>Includes optimized indices on foreign keys and active pricing fields to keep search queries fast at scale.</p>
+                    </div>
+                    <div class="adv-card">
+                        <div class="adv-badge color-pink">🚀</div>
+                        <h3>Scalable Variants</h3>
+                        <p>Adding new attributes (like colors or sizes) does not require altering table structures, thanks to the JSONB attributes column.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Interactive Demo Stats (Light Theme) -->
+        <section class="slide slide-light" id="slide-8">
+            <div class="slide-content">
+                <h2 class="slide-header">Database Metrics & Seed State</h2>
+                <p class="slide-subheader">Initial system telemetry loaded via our seed script</p>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-val">16</div>
+                        <div class="metric-lbl">Schema Tables</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-val">5</div>
+                        <div class="metric-lbl">Active UOMs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-val">2</div>
+                        <div class="metric-lbl">Asset Classes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-val">₹2k</div>
+                        <div class="metric-lbl">EMI Threshold Limit</div>
+                    </div>
+                </div>
+
+                <div class="charts-section">
+                    <h4>Stock Levels per Packaging Unit</h4>
+                    <div class="chart-container">
+                        <div class="bar-group">
+                            <span class="bar-label">Blue Pen (Piece)</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill fill-purple" style="width: 60%;"></div>
+                                <span class="bar-value">300 Pcs</span>
+                            </div>
+                        </div>
+                        <div class="bar-group">
+                            <span class="bar-label">Blue Pen (Box)</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill fill-blue" style="width: 30%;"></div>
+                                <span class="bar-value">50 Boxes</span>
+                            </div>
+                        </div>
+                        <div class="bar-group">
+                            <span class="bar-label">A4 Notebook (Piece)</span>
+                            <div class="bar-wrapper">
+                                <div class="bar-fill fill-green" style="width: 80%;"></div>
+                                <span class="bar-value">1000 Pcs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Thank You (Dark Theme) -->
+        <section class="slide slide-dark" id="slide-9">
+            <div class="glow-bg"></div>
+            <div class="slide-content center-align">
+                <div class="icon-circle animate-pulse">
+                    <span class="icon-asset">⭐</span>
+                </div>
+                <h1 class="main-title text-white">Stationery<span>Hub</span></h1>
+                <p class="subtitle-text text-light-gray">Thank You for Your Time</p>
+                <div class="quote-container">
+                    <p class="quote">Questions & Discussion</p>
+                </div>
+                <div class="pill-container">
+                    <span class="pill">Host: localhost</span>
+                    <span class="pill">Port: 5432</span>
+                    <span class="pill">User: postgres</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Controls (Bottom Right Floating) -->
+        <div class="nav-controls">
+            <button class="nav-btn" id="prev-btn" disabled>◂</button>
+            <span class="slide-number"><span id="curr-num">1</span> / 9</span>
+            <button class="nav-btn" id="next-btn">▸</button>
+        </div>
+    </div>
+
+    <script src="pr.js"></script>
+</body>
+</html>

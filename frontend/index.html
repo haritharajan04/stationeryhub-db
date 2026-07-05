@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STATIONERYHUB.CO | Premium Art & Writing Supplies</title>
+    <link rel="stylesheet" href="index.css?v=3">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Promo Banner -->
+    <div class="promo-banner">
+        <p>🚚 Free shipping on orders above ₹499 &nbsp;&nbsp;|&nbsp;&nbsp; COD Available &nbsp;&nbsp;|&nbsp;&nbsp; Easy Returns &nbsp;&nbsp;|&nbsp;&nbsp; 🌟 Student Discount 10% OFF</p>
+    </div>
+
+    <!-- Apple/Notion Premium Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <h1 class="logo" id="site-logo" style="cursor: pointer;">STATIONERYHUB<span>.CO</span></h1>
+            
+            <nav class="nav-links">
+                <a href="#catalog" class="nav-link active" id="nav-catalog">Shop</a>
+            </nav>
+
+            <!-- Search Bar -->
+            <div class="search-bar-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="catalog-search-input" placeholder="Search for products, variants, categories...">
+                <button id="activate-voice-search" style="background: none; border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center;" title="Search with voice">🎙️</button>
+            </div>
+
+            <!-- Action Icons -->
+            <div class="nav-actions">
+                <div class="nav-action-item" onclick="switchTab('account')" style="cursor: pointer;" title="My Account">
+                    <span class="action-icon">👤</span>
+                    <span class="action-label">Account</span>
+                </div>
+                <div class="nav-action-item" id="cart-nav" title="View Cart">
+                    <span class="action-icon">🛒</span>
+                    <span class="badge" id="cart-count">0</span>
+                    <span class="action-label">Cart</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Apple-style Premium Hero Section -->
+    <section class="hero-premium">
+        <div class="hero-premium-container">
+            <div class="hero-premium-left">
+                <span class="badge-premium">🌸 Premium Quality Stationery</span>
+                <h2 class="hero-premium-title">Inspire. Create.<br><span class="accent-text">Write</span> Your Story.</h2>
+                <p class="hero-premium-subtitle">Discover handpicked stationery that matches your creative style. From everyday essentials to premium collections.</p>
+                
+                <div class="hero-actions">
+                    <a href="#catalog" class="btn-premium-primary">Shop Now &rarr;</a>
+                    <a href="#catalog" class="btn-premium-secondary">Explore Collections</a>
+                </div>
+
+                <div class="hero-features">
+                    <div class="feature-tag">⭐ <strong>Premium Quality</strong> <span class="tag-desc">Carefully curated</span></div>
+                    <div class="feature-tag">🛡️ <strong>Secure Shopping</strong> <span class="tag-desc">100% safe & secure</span></div>
+                    <div class="feature-tag">🚚 <strong>Fast Delivery</strong> <span class="tag-desc">Across India</span></div>
+                </div>
+            </div>
+            
+            <div class="hero-premium-right">
+                <!-- Notion-inspired Pastel Stationery Mockup Collage -->
+                <div class="collage-container">
+                    <div class="collage-notebook">
+                        <div class="spiral-binding">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="notebook-content">
+                            <span class="notebook-tag">FOCUS</span>
+                            <span class="notebook-tag">PLAN</span>
+                            <span class="notebook-tag">CREATE</span>
+                        </div>
+                    </div>
+                    <div class="collage-pen"></div>
+                    <div class="collage-tape"></div>
+                    
+                    <!-- New Here Promo Card Inside Hero -->
+                    <div class="new-user-promo-card">
+                        <span class="gift-icon">🎁</span>
+                        <h5>New Here?</h5>
+                        <p>Get <strong>10% OFF</strong> on your first order</p>
+                        <button onclick="switchTab('account')" class="btn-promo-shop">Shop Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notion-style Values Bar Grid -->
+    <div class="values-bar">
+        <div class="values-container">
+            <div class="value-item">
+                <span class="value-icon">📦</span>
+                <div>
+                    <strong>10,000+ Products</strong>
+                    <p>Wide range of stationery</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <span class="value-icon">🏷️</span>
+                <div>
+                    <strong>Top Brands</strong>
+                    <p>Trusted & premium brands</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <span class="value-icon">💼</span>
+                <div>
+                    <strong>Bulk Orders</strong>
+                    <p>Best prices for bulk</p>
+                </div>
+            </div>
+            <div class="value-item">
+                <span class="value-icon">📞</span>
+                <div>
+                    <strong>Customer Support</strong>
+                    <p>We're here to help</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop by Category Section -->
+    <section class="category-section">
+        <div class="category-header">
+            <h3>Shop by Category</h3>
+            <a href="#catalog" class="view-all-link">View All Categories &rarr;</a>
+        </div>
+        <div class="category-grid">
+            <div class="category-card cat-notebooks" onclick="filterCatalog('notebook')">
+                <div class="cat-icon">📓</div>
+                <h4>Notebooks</h4>
+            </div>
+            <div class="category-card cat-pens" onclick="filterCatalog('pen')">
+                <div class="cat-icon">✏️</div>
+                <h4>Pens & Pencils</h4>
+            </div>
+            <div class="category-card cat-art" onclick="filterCatalog('paint')">
+                <div class="cat-icon">🎨</div>
+                <h4>Art Supplies</h4>
+            </div>
+            <div class="category-card cat-organizers" onclick="filterCatalog('palette')">
+                <div class="cat-icon">🗂️</div>
+                <h4>Organizers</h4>
+            </div>
+            <div class="category-card cat-pouches" onclick="filterCatalog('pouch')">
+                <div class="cat-icon">👝</div>
+                <h4>Pouches</h4>
+            </div>
+            <div class="category-card cat-pads" onclick="filterCatalog('canvas')">
+                <div class="cat-icon">📝</div>
+                <h4>Paper & Pads</h4>
+            </div>
+            <div class="category-card cat-diaries" onclick="filterCatalog('crayons')">
+                <div class="cat-icon">📔</div>
+                <h4>Diaries & Planners</h4>
+            </div>
+            <div class="category-card cat-accessories" onclick="filterCatalog('bottles')">
+                <div class="cat-icon">📎</div>
+                <h4>Accessories</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Voice Search Bar Indicator -->
+    <div class="voice-search-bar" id="voice-search-indicator" style="display: none;">
+        <div class="voice-bar-content">
+            <div class="pulse-ring"></div>
+            <span id="voice-search-status">Listening for search terms...</span>
+            <button class="close-voice-btn" id="stop-voice-search">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Storefront Product Catalog Section -->
+        <section id="catalog-section">
+            <h3 class="section-title">NEW ARRIVALS</h3>
+            <div class="products-grid" id="products-container">
+                <!-- Dynamic product cards will load here via app.js -->
+            </div>
+        </section>
+
+
+
+        <!-- Account System (Auth / Profile & Order History) -->
+        <section id="account-section" style="display: none;">
+            <!-- Authentication forms (if not logged in) -->
+            <div class="auth-box" id="auth-box">
+                <div class="auth-tabs">
+                    <button class="auth-tab-btn active" id="tab-login-btn">Log In</button>
+                    <button class="auth-tab-btn" id="tab-register-btn">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <p style="font-size:12px; color:#4f46e5; margin-bottom:15px; background:#eff6ff; border: 1px solid #bfdbfe; padding:10px; border-radius:8px; text-align:center; line-height:1.4;">
+                        💡 <strong>Quick Test Account:</strong><br>
+                        Email: <strong style="text-decoration: underline;">customer@stationeryhub.com</strong><br>
+                        Password: <strong>seller123</strong>
+                    </p>
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="register-form" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-first-name">First Name</label>
+                            <input type="text" id="reg-first-name" required placeholder="Rahul">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-last-name">Last Name</label>
+                            <input type="text" id="reg-last-name" required placeholder="Singh">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" required placeholder="rahul.singh@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">Phone Number</label>
+                        <input type="tel" id="reg-phone" placeholder="9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-address">Default Shipping Address</label>
+                        <textarea id="reg-address" placeholder="123 Street Name, City, State, ZIP..." style="width: 100%; min-height: 60px; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-family: inherit; font-size: 13px; resize: none;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+            </div>
+
+            <!-- Profile Overview and Order History (If logged in) -->
+            <div class="profile-container" id="profile-container" style="display: none;">
+                <div class="profile-header-card">
+                    <div class="profile-avatar">👤</div>
+                    <div class="profile-meta">
+                        <h2 id="profile-name">John Doe</h2>
+                        <p id="profile-email">john.doe@example.com</p>
+                        <span class="pill-role" id="profile-role">Customer</span>
+                    </div>
+                    <button class="btn btn-secondary" id="logout-btn" style="margin-left: auto;">Log Out</button>
+                </div>
+
+                <div class="address-management-card" id="profile-address-card" style="background:#fff; border:1px solid var(--border-light); border-radius:12px; padding:20px; margin-bottom:20px; display:none;">
+                    <h4 style="margin-bottom:10px; font-size:15px; color:#000;">🚚 Shipping Address</h4>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <textarea id="profile-address-input" placeholder="No delivery address configured..." style="width: 100%; min-height: 60px; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-family: inherit; font-size: 13px; resize: none;"></textarea>
+                        <button onclick="updateProfileAddress()" class="btn btn-secondary" style="width:fit-content; padding: 8px 16px; font-size:12px; cursor:pointer;">Save Address Changes</button>
+                    </div>
+                </div>
+
+                <!-- Customer Section: Order History -->
+                <div class="dashboard-sub-section" id="customer-dashboard-view" style="display: none;">
+                    <div class="order-history-section">
+                        <h3 class="section-title" style="text-align: left; font-size: 24px; margin-bottom: 20px;">Order History & Tracking</h3>
+                        <div class="order-list" id="order-list">
+                            <p class="empty-message">No orders placed yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Section: Operational Dashboard & Complaints Management -->
+                <div class="dashboard-sub-section" id="admin-dashboard-view" style="display: none;">
+                    <div class="admin-controls-card" style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                        <h3 class="section-title" style="text-align: left; font-size: 24px; margin-bottom: 20px;">🔒 Administrator Console</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Review filed customer issues and classify resolution updates instantly.</p>
+                        
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div class="live-feed" style="flex: 1; min-width: 280px;">
+                                <h4 style="margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;">Pending Customer Complaints</h4>
+                                <div class="feed-items" id="admin-complaints-list">
+                                    <p style="color: var(--text-muted); font-size: 13px;">No active support tickets.</p>
+                                </div>
+                            </div>
+                            <div class="live-feed" style="flex: 1; min-width: 280px;">
+                                <h4 style="margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;">👤 Active Sellers Directory</h4>
+                                <div class="feed-items" id="admin-sellers-list" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <p style="color: var(--text-muted); font-size: 13px;">Loading active sellers...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Seller & Product Management Panel -->
+                    <div style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                        <!-- Create Seller Card -->
+                        <div style="flex: 1; min-width: 300px; background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                            <h4 style="font-size: 18px; margin-bottom: 15px; color:#000;">👤 Register New Seller</h4>
+                            <form id="admin-create-seller-form" onsubmit="event.preventDefault(); adminCreateSeller();" style="display: flex; flex-direction: column; gap: 10px;">
+                                <div class="form-group">
+                                    <input type="text" id="new-seller-fname" placeholder="First Name" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="new-seller-lname" placeholder="Last Name" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" id="new-seller-email" placeholder="Email Address" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="new-seller-password" placeholder="Password" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="padding: 10px; font-size:13px;">Register Seller</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Create Product Card -->
+                        <div style="flex: 1.5; min-width: 320px; background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                            <h4 style="font-size: 18px; margin-bottom: 15px; color:#000;">📦 Create New Product Listing</h4>
+                            <form id="admin-create-product-form" onsubmit="event.preventDefault(); adminCreateProduct();" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <input type="text" id="new-prod-name" placeholder="Product Name (e.g. Pilot Frixion Erasable Pen)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <input type="text" id="new-prod-desc" placeholder="Product Description" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="new-prod-sku-base" placeholder="Base SKU Prefix (e.g. PLT-FRX)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <select id="new-prod-category" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; height: 38px; font-size:13px;">
+                                        <option value="1">Writing Instruments (Category 1)</option>
+                                        <option value="2">Paper Products (Category 2)</option>
+                                        <option value="3">Fine Art Media (Category 3)</option>
+                                        <option value="4">Accessories (Category 4)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="new-prod-var-name" placeholder="Variant (e.g. Black Ink)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="new-prod-sku-var" placeholder="Variant SKU (e.g. PLT-FRX-BLK)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" step="0.01" id="new-prod-price" placeholder="Price (₹)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" id="new-prod-stock" placeholder="Initial Stock Qty" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <select id="new-prod-seller" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; height: 38px; font-size:13px;">
+                                        <option value="">Select Assignee Seller...</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="grid-column: span 2; padding: 10px; font-size:13px;">Publish Product Listing</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Stats Grid -->
+                    <div style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px; background: #10b981; color: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.9;">💰 Total Revenue Credited</span>
+                            <h2 style="font-size: 30px; font-weight: 800; margin-top: 5px; color:#fff;" id="admin-total-revenue">₹0.00</h2>
+                            <p style="font-size: 11px; margin-top: 5px; opacity: 0.9;">Cleared & Settled in Corporate Bank Account</p>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; background: #f59e0b; color: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.9;">📦 Pending COD Collections</span>
+                            <h2 style="font-size: 30px; font-weight: 800; margin-top: 5px; color:#fff;" id="admin-pending-revenue">₹0.00</h2>
+                            <p style="font-size: 11px; margin-top: 5px; opacity: 0.9;">To be collected in cash by delivery agent</p>
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Stock Inventory Overview Card -->
+                    <div class="admin-inventory-card" style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; margin-top: 20px;">
+                        <h3 class="section-title" style="text-align: left; font-size: 24px; margin-bottom: 15px;">📦 Warehouse Inventory Stock Overview</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Review real-time variant stock volumes mapped across all active suppliers.</p>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-light); font-weight: 700;">
+                                        <th style="padding: 10px;">Product / Variant</th>
+                                        <th style="padding: 10px;">SKU</th>
+                                        <th style="padding: 10px;">Seller Assignee</th>
+                                        <th style="padding: 10px; width: 120px;">Stock Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-inventory-table">
+                                    <tr>
+                                        <td colspan="4" style="padding: 15px; text-align: center; color: var(--text-muted);">Loading global stocks...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Admin Order Management Card -->
+                    <div class="admin-orders-card" style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; margin-top: 20px;">
+                        <h3 class="section-title" style="text-align: left; font-size: 24px; margin-bottom: 15px;">📦 Global Orders Monitor</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Review customer payments and update package shipping statuses.</p>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-light); font-weight: 700;">
+                                        <th style="padding: 10px;">Order ID / Date</th>
+                                        <th style="padding: 10px;">Customer</th>
+                                        <th style="padding: 10px;">Ordered Items</th>
+                                        <th style="padding: 10px;">Total Paid</th>
+                                        <th style="padding: 10px; width: 220px;">Status / Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-orders-table">
+                                    <tr>
+                                        <td colspan="5" style="padding: 15px; text-align: center; color: var(--text-muted);">Loading global orders list...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seller Section: Inventory Control Panel -->
+                <div class="dashboard-sub-section" id="seller-dashboard-view" style="display: none;">
+                    <div class="seller-controls-card" style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                        <h3 class="section-title" style="text-align: left; font-size: 24px; margin-bottom: 20px;">🏪 Seller Stock Management</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Manage warehouse inventory volumes. Restock items or log manual stock values.</p>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-light); font-weight: 700;">
+                                        <th style="padding: 10px;">Product / Variant</th>
+                                        <th style="padding: 10px;">SKU</th>
+                                        <th style="padding: 10px;">Stock Count</th>
+                                        <th style="padding: 10px; width: 180px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="seller-inventory-table">
+                                    <tr>
+                                        <td colspan="4" style="padding: 15px; text-align: center; color: var(--text-muted);">Loading inventory details...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Seller Product Registration Card -->
+                    <div style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top:20px;">
+                        <h4 style="font-size: 18px; margin-bottom: 15px; color:#000;">📦 Publish New Product Listing</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Create and publish a brand new stationery product catalog record and register your initial stock levels.</p>
+                        <form id="seller-create-product-form" onsubmit="event.preventDefault(); sellerCreateProduct();" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <input type="text" id="seller-prod-name" placeholder="Product Name (e.g. Pilot Frixion Erasable Pen)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <input type="text" id="seller-prod-desc" placeholder="Product Description" style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="seller-prod-sku-base" placeholder="Base SKU Prefix (e.g. PLT-FRX)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group">
+                                <select id="seller-prod-category" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; height: 38px; font-size:13px;">
+                                    <option value="1">Writing Instruments (Category 1)</option>
+                                    <option value="2">Paper Products (Category 2)</option>
+                                    <option value="3">Fine Art Media (Category 3)</option>
+                                    <option value="4">Accessories (Category 4)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="seller-prod-var-name" placeholder="Variant (e.g. Black Ink)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="seller-prod-sku-var" placeholder="Variant SKU (e.g. PLT-FRX-BLK)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" step="0.01" id="seller-prod-price" placeholder="Price (₹)" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" id="seller-prod-stock" placeholder="Initial Stock Qty" required style="width: 100%; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size:13px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block" style="grid-column: span 2; padding: 10px; font-size:13px;">Publish Product Listing</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Shopping Cart Drawer -->
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h3>Shopping Cart</h3>
+                <button class="close-btn" id="close-cart-btn">&times;</button>
+            </div>
+            
+            <div class="cart-items-list" id="cart-items">
+                <p class="empty-message">Your cart is empty.</p>
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-line">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">₹0.00</span>
+                </div>
+                <div class="summary-line" id="discount-row" style="display: none; color: var(--accent-red);">
+                    <span id="discount-title">Discount (10%)</span>
+                    <span id="cart-discount">-₹0.00</span>
+                </div>
+                <div class="summary-line" style="font-weight: 700; font-size: 18px; border-top: 1px solid var(--border-light); padding-top: 15px; margin-top: 10px;">
+                    <span>Total</span>
+                    <span id="cart-total">₹0.00</span>
+                </div>
+                
+                <div class="summary-line coupon-line">
+                    <input type="text" id="coupon-input" placeholder="Promo Code (WELCOME10)">
+                    <button class="btn btn-secondary" id="apply-coupon-btn" style="padding: 8px 15px;">Apply</button>
+                </div>
+                
+                <div class="active-offers" style="margin-top: 15px; border-top: 1px dashed var(--border-light); padding-top: 10px; font-size: 11px; color: var(--text-secondary);">
+                    <p style="font-weight: 700; margin-bottom: 5px; color: #000;">🏷️ Active Promo Offers:</p>
+                    <ul style="padding-left: 15px; margin: 0; display: flex; flex-direction: column; gap: 4px; list-style-type: disc;">
+                        <li><strong>WELCOME10:</strong> 10% Off on all orders.</li>
+                        <li><strong>FIRSTUSER:</strong> 20% Off on your first order.</li>
+                        <li><strong>STUDENT15:</strong> 15% Off (Student discount on all essentials!).</li>
+                    </ul>
+                </div>
+                
+                <div class="payment-selection">
+                    <h4>Payment Method</h4>
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="CARD" checked>
+                        <span>Credit / Debit Card</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment-method" value="COD">
+                        <span>Cash on Delivery</span>
+                    </label>
+                    <label class="payment-option" id="emi-selection-option" style="display: none;">
+                        <input type="radio" name="payment-method" value="EMI">
+                        <span>Easy EMI Financing (Orders &ge; ₹2000)</span>
+                    </label>
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="checkout-btn" style="padding: 15px;">Go to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Gateway Modal Dialog -->
+    <div class="payment-modal" id="payment-gateway-modal" style="display: none;">
+        <div class="payment-gateway-card">
+            <div class="gateway-header">
+                <h3>🔒 Secure Payment Gateway</h3>
+                <span class="ssl-badge">Verified by Stripe</span>
+            </div>
+            
+            <div class="payment-details-summary">
+                <p>Order Total: <strong id="gateway-total-amount">₹0.00</strong></p>
+                <p id="gateway-emi-schedule" style="display: none;"></p>
+            </div>
+
+            <!-- Shipping Address Form -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="shipping-address-input" style="font-weight: 700;">🚚 Shipping Address</label>
+                <textarea id="shipping-address-input" placeholder="Enter complete delivery address (Street, City, ZIP)..." required style="width: 100%; min-height: 60px; padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-family: inherit; font-size: 13px; margin-top: 5px; resize: none;"></textarea>
+            </div>
+
+            <!-- Card Processing Details -->
+            <div class="card-details-form" id="card-fields">
+                <div class="form-group">
+                    <label for="card-holder">Cardholder Name</label>
+                    <input type="text" id="card-holder" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="4111 2222 3333 4444" maxlength="19">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="card-expiry">Expiry Date</label>
+                        <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="card-cvv">CVV</label>
+                        <input type="password" id="card-cvv" placeholder="•••" maxlength="4">
+                    </div>
+                </div>
+            </div>
+
+            <!-- COD Processing Details -->
+            <div id="cod-fields" style="display: none; padding: 15px; background: #f8fafc; border: 1px solid var(--border-light); border-radius: 6px; margin-bottom: 20px;">
+                <p style="font-size: 14px; font-weight: 600;">📝 Cash on Delivery Confirmation</p>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 5px;">Your order will be shipped, and you can pay the courier in cash upon arrival.</p>
+            </div>
+
+            <div class="gateway-footer">
+                <button class="btn btn-secondary" id="cancel-payment-btn">Cancel</button>
+                <button class="btn btn-primary" id="confirm-payment-btn">Authorize Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 StationeryHub. Secure payment sandbox and JWT customer account module enabled.</p>
+    </footer>
+
+    <script src="app.js?v=7"></script>
+</body>
+</html>

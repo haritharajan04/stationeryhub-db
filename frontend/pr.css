@@ -1,0 +1,635 @@
+/* Color Palettes */
+:root {
+    --bg-dark: #0f1026;
+    --primary-color: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.4);
+    
+    --purple-main: #3a1c71;
+    --purple-grad: linear-gradient(135deg, #1f1235 0%, #0f0a1c 100%);
+    
+    --text-white: #ffffff;
+    --text-gray: #d1d5db;
+    --text-muted: #9ca3af;
+    
+    --card-light-bg: #ffffff;
+    --card-light-border: #e5e7eb;
+    --text-light-dark: #111827;
+    --text-light-gray: #4b5563;
+    
+    --color-green: #10b981;
+    --color-blue: #3b82f6;
+    --color-gold: #f59e0b;
+    --color-pink: #ec4899;
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #05050f;
+}
+
+.presentation-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Slides Base */
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+}
+
+.slide.active-slide {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Theme Variant 1: Dark Mode */
+.slide-dark {
+    background: var(--purple-grad);
+    color: var(--text-white);
+}
+
+.glow-bg {
+    position: absolute;
+    top: -20%;
+    right: -20%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Theme Variant 2: Light Mode */
+.slide-light {
+    background-color: #f8fafc;
+    color: var(--text-light-dark);
+}
+
+/* Slide Content Layout */
+.slide-content {
+    width: 100%;
+    max-width: 1100px;
+    z-index: 5;
+}
+
+.center-align {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Slide Typo Header components */
+.slide-header {
+    font-family: 'Outfit', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.slide-subheader {
+    font-size: 20px;
+    color: var(--text-muted);
+    margin-bottom: 45px;
+}
+
+.slide-light .slide-subheader {
+    color: var(--text-light-gray);
+}
+
+/* Title Slide Components */
+.icon-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px var(--primary-glow);
+}
+
+.icon-asset {
+    font-size: 40px;
+}
+
+.main-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 15px;
+}
+
+.main-title span {
+    color: var(--primary-color);
+}
+
+.subtitle-text {
+    font-size: 24px;
+    color: var(--text-gray);
+    margin-bottom: 40px;
+}
+
+.quote-container {
+    border-left: 3px solid var(--primary-color);
+    padding-left: 20px;
+    margin-bottom: 45px;
+}
+
+.quote {
+    font-size: 20px;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.pill-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pill {
+    padding: 8px 20px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-gray);
+}
+
+.footer-note {
+    position: absolute;
+    bottom: 40px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Slide 2 Grid: Problem Cards */
+.problem-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.problem-card {
+    background: var(--card-light-bg);
+    border: 1px solid var(--card-light-border);
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--accent-red, #ef4444);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.card-icon {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.problem-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-light-dark);
+}
+
+.problem-card p {
+    color: var(--text-light-gray);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Slide 3 Grid: Solution Cards */
+.solution-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.solution-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 25px;
+    transition: transform 0.3s ease;
+}
+
+.icon-wrap {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.color-1 { background-color: rgba(99, 102, 241, 0.15); color: #818cf8; }
+.color-2 { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
+.color-3 { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.color-4 { background-color: rgba(236, 72, 153, 0.15); color: #f472b6; }
+.color-5 { background-color: rgba(239, 68, 68, 0.15); color: #f87171; }
+.color-6 { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+.solution-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.solution-card p {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.5;
+}
+
+/* Slide 4 Grid: Architecture Tiers */
+.tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.tier-card {
+    background: var(--card-light-bg);
+    border: 1px solid var(--card-light-border);
+    border-radius: 8px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-header {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    align-self: flex-start;
+    margin-bottom: 20px;
+}
+
+.tier-purple .tier-header { background-color: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
+.tier-blue .tier-header { background-color: rgba(59, 130, 246, 0.1); color: var(--color-blue); }
+.tier-green .tier-header { background-color: rgba(16, 185, 129, 0.1); color: var(--color-green); }
+
+.tier-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.tier-list {
+    list-style: none;
+}
+
+.tier-list li {
+    font-size: 14px;
+    color: var(--text-light-gray);
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.tier-list li::before {
+    content: '●';
+    position: absolute;
+    left: 0;
+    font-size: 10px;
+}
+
+.tier-purple li::before { color: var(--primary-color); }
+.tier-blue li::before { color: var(--color-blue); }
+.tier-green li::before { color: var(--color-green); }
+
+.tech-stack-banner {
+    margin-top: 40px;
+    padding: 15px;
+    background-color: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    color: var(--primary-color);
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* Slide 5 Flowchart */
+.flow-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.flow-step {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 25px;
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.flow-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    font-weight: 800;
+}
+
+.flow-step h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.flow-step p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.flow-arrow {
+    font-size: 28px;
+    color: var(--primary-color);
+}
+
+.verification-banner {
+    margin-top: 45px;
+    padding: 15px;
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Slide 6 Split columns */
+.features-split {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+}
+
+.feature-col {
+    background: var(--card-light-bg);
+    border: 1px solid var(--card-light-border);
+    border-radius: 8px;
+    padding: 35px;
+}
+
+.feature-col h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.purple-accent h3 { color: var(--primary-color); }
+.blue-accent h3 { color: var(--color-blue); }
+
+.feature-bullets {
+    list-style: none;
+}
+
+.feature-bullets li {
+    font-size: 15px;
+    color: var(--text-light-gray);
+    margin-bottom: 18px;
+    position: relative;
+    padding-left: 24px;
+}
+
+.feature-bullets li::before {
+    content: '●';
+    position: absolute;
+    left: 0;
+    font-size: 12px;
+}
+
+.purple-accent li::before { color: var(--primary-color); }
+.blue-accent li::before { color: var(--color-blue); }
+
+/* Slide 7 Advantages Grid */
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.adv-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.adv-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.color-green { background-color: rgba(16, 185, 129, 0.1); color: var(--color-green); }
+.color-blue { background-color: rgba(59, 130, 246, 0.1); color: var(--color-blue); }
+.color-gold { background-color: rgba(245, 158, 11, 0.1); color: var(--color-gold); }
+.color-pink { background-color: rgba(236, 72, 153, 0.1); color: var(--color-pink); }
+
+.adv-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.adv-card p {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.5;
+}
+
+/* Slide 8 Metrics & Charts */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.metric-card {
+    background: var(--card-light-bg);
+    border: 1px solid var(--card-light-border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+}
+
+.metric-val {
+    font-family: 'Outfit', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1.1;
+    margin-bottom: 5px;
+}
+
+.metric-lbl {
+    font-size: 13px;
+    color: var(--text-light-gray);
+    font-weight: 600;
+}
+
+.charts-section {
+    background: var(--card-light-bg);
+    border: 1px solid var(--card-light-border);
+    border-radius: 8px;
+    padding: 25px;
+}
+
+.charts-section h4 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bar-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bar-label {
+    width: 150px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+}
+
+.bar-wrapper {
+    flex-grow: 1;
+    background: #e2e8f0;
+    height: 24px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.bar-fill {
+    height: 100%;
+}
+
+.fill-purple { background-color: var(--primary-color); }
+.fill-blue { background-color: var(--color-blue); }
+.fill-green { background-color: var(--color-green); }
+
+.bar-value {
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light-dark);
+}
+
+/* Floating Navigation Controls */
+.nav-controls {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    z-index: 100;
+    background: rgba(15, 16, 38, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 5px 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    outline: none;
+    transition: opacity 0.3s;
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slide-number {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-gray);
+    user-select: none;
+}
